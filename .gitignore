@@ -1,0 +1,9 @@
+# general
+*.sw?
+
+# app
+/lib/config.py
+/data/main.db
+/data/images
+/data/screenshots
+
