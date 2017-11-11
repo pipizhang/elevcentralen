@@ -11,7 +11,7 @@ else:
     raise IOError("Not found config file")
 
 def get(key):
-    if key in ["database", "screenshots", "chromedriver"]:
+    if key in ["database", "images", "screenshots", "chromedriver"]:
         if not os.path.isabs(settings[key]):
             settings[key] = "%s/%s" % (ROOT_PATH, settings[key])
     return settings[key]
