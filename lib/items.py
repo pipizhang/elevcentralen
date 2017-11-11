@@ -1,6 +1,6 @@
-import models
-import helper
-import config as cfg
+from . import models
+from . import helper
+from . import config as cfg
 
 class Image:
 
@@ -16,6 +16,7 @@ class Image:
         return "%s/%s" % (cfg.get("images"), self.get_file_name())
 
     def download(self, driver):
+        print("-> dowload %s %s" % (self.big_img_url, self.get_file_path()))
         helper.download_image(driver, self.big_img_url, self.get_file_path())
 
 class Choice:
@@ -43,23 +44,25 @@ class Question:
 
     def __init__(self, content, image):
         self.content = content.strip()
-        self.image = None
+        self.image = Image(image)
         self.code = ""
         self.choices = []
 
     def add_choice(self, choice):
         self.choices.append(choice)
 
-    def add_image(self, image):
-        self.image = Image(image)
-
     def get_code(self):
         arr = []
-        arr.append(helper.md5(self.connect))
+        arr.append(helper.md5(self.content))
         for v in self.choices:
             arr.append(v.code)
 
         return helper.md5(''.join(arr))
+
+    def set_code(self):
+        if len(self.choices) == 0:
+            raise RuntimeError("question must has choices")
+        self.code = self.get_code()
 
     def is_new(self):
         n = models.Question.select().where(models.Question.code == self.code).count()
@@ -71,17 +74,36 @@ class Question:
                 return True
         return False
 
+    """ Update the known incorrect choice """
+    def update_choice_status(self, question_id):
+        mquestion = models.Question.select().where(models.Question.id == question_id).get()
+        if mquestion.is_known:
+            mchoices = models.Choice.select().where(models.Choice.question_id == question_id)
+            for mchoice in mchoices:
+                if mchoice.status == 0:
+                    mchoice.status = -1
+                    mchoice.save()
+
     def add_or_update(self):
 
         if self.is_new():
             mquestion = models.Question.create(content = self.content, code = self.code, image = self.image.get_file_name(), is_known = self.is_known())
+            print("- find a new question")
+            print("id: %d" % mquestion.id)
         else:
             mquestion = models.Question.select().where(models.Question.code == self.code).get()
-            if not mquestion.is_known
+            print("= find a old question")
+            print("id: %d" % mquestion.id)
+            if not mquestion.is_known:
                 mchoice.is_known = self.is_known()
                 mchoice.save()
 
         for v in self.choices:
             v.question_id = mquestion.id
             v.add_or_update()
+
+        self.update_choice_status(mquestion.id)
+
+
+
 
