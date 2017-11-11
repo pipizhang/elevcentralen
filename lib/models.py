@@ -1,18 +1,18 @@
-"""lib.models model classies"""
-
+import os
 from peewee import *
-import config as cfg
+from . import config as cfg
 
-database = SqliteDatabase(cfg.database)
+db = SqliteDatabase(cfg.get("database"))
 
 class BaseModel(Model):
     class Meta:
-        database = database
+        database = db
 
 class Question(BaseModel):
     content = TextField()
     image = CharField()
-    #code = FixedCharField(max_length=32, default=None)
+    code = FixedCharField(max_length=32, default=None)
+    is_known = BooleanField(default=False)
     class Meta:
         auto_increment = True
 
@@ -20,7 +20,7 @@ class Choice(BaseModel):
     question = ForeignKeyField(Question)
     content = TextField()
     status = IntegerField(default=0)
-    #code = FixedCharField(max_length=32, default=None)
+    code = FixedCharField(max_length=32, default=None)
     class Meta:
         auto_increment = True
 
@@ -29,4 +29,11 @@ class User(BaseModel):
     password = CharField()
     email = CharField()
     join_date = DateTimeField()
+
+def setup(force = False):
+    if force and os.path.isfile(cfg.get("database")):
+        os.remove(cfg.get("database"))
+
+    db.connect()
+    db.create_tables([Question, Choice, User])
 
