@@ -2,7 +2,8 @@
 *.sw?
 
 # app
-/lib/config.py
+__pycache__
+/config/app.yml
 /data/main.db
 /data/images
 /data/screenshots
