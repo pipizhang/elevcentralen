@@ -27,8 +27,6 @@ class Page(object):
         self._open()
         if not self._validate():
             raise Exception("PAGE %s is invalid" % type(self).name)
-        #_file = "/tmp/%d.png" % random.randrange(1, 1000)
-        #self.driver.get_screenshot_as_file(_file)
         self._process()
         self._next()
         time.sleep(5)
@@ -111,15 +109,11 @@ class EducationOverviewPage(Page):
             _onclick_list.append(el.get_attribute("onclick").strip().replace(" return false;", ""))
         self.driver.find_element_by_xpath("//div[@class='modal-footer']/button").click()
 
-        i = 0
         for _onclick in _onclick_list:
             self._open_question_page(_onclick)
-            i = i + 1
             time.sleep(5)
-            if i >= 5:
-                print(' >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
-                self._quite_test()
-                break
+
+        self._quite_test()
 
     def _open_question_page(self, js):
         self.driver.execute_script(js)
@@ -170,6 +164,9 @@ class QuestionPage(Page):
             iQuestion.image.download(self.driver)
 
         iQuestion.add_or_update()
+
+        # screenshot
+        items.Screenshot(iQuestion).take(self.driver)
 
     def _check_child_exists(self, element, css):
         el = element.find_elements_by_css_selector(css)

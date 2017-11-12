@@ -1,3 +1,4 @@
+import os
 from . import models
 from . import helper
 from . import config as cfg
@@ -16,8 +17,28 @@ class Image:
         return "%s/%s" % (cfg.get("images"), self.get_file_name())
 
     def download(self, driver):
-        print("-> dowload %s %s" % (self.big_img_url, self.get_file_path()))
+        print(" - download %s" % self.big_img_url)
         helper.download_image(driver, self.big_img_url, self.get_file_path())
+
+class Screenshot:
+
+    def __init__(self, iquestion):
+        self.iquestion = iquestion
+
+    def take(self, driver):
+        name = self.iquestion.code
+        out_file = "%s/%s.png" % (cfg.get("screenshots"), name)
+        if not os.path.isfile(out_file):
+            self._process(driver, out_file)
+        else:
+            if self.iquestion.is_known():
+                self._process(driver, out_file)
+
+    def _process(self, driver, out_file):
+        print(" - screenshot %s" % out_file)
+        driver.get_screenshot_as_file(out_file)
+        if os.path.isfile("/usr/bin/mogrify"):
+            os.system("/usr/bin/mogrify -crop 940x540+60+65 '%s'" % out_file)
 
 class Choice:
 
@@ -37,7 +58,7 @@ class Choice:
         else:
             mchoice = models.Choice.get(models.Choice.question_id == self.question_id, models.Choice.code == self.code)
             if mchoice.status == 0 and self.status != 0:
-                mchoice.status == self.status
+                mchoice.status = self.status
                 mchoice.save()
 
 class Question:
@@ -87,16 +108,17 @@ class Question:
     def add_or_update(self):
 
         if self.is_new():
+
             mquestion = models.Question.create(content = self.content, code = self.code, image = self.image.get_file_name(), is_known = self.is_known())
-            print("- find a new question")
-            print("id: %d" % mquestion.id)
+            print(" - add a new question, id: %d" % mquestion.id)
+
         else:
+
             mquestion = models.Question.select().where(models.Question.code == self.code).get()
-            print("= find a old question")
-            print("id: %d" % mquestion.id)
-            if not mquestion.is_known:
-                mchoice.is_known = self.is_known()
-                mchoice.save()
+            print(" - find a old question, id: %d" % mquestion.id)
+            if (not mquestion.is_known) and self.is_known():
+                mquestion.is_known = self.is_known()
+                mquestion.save()
 
         for v in self.choices:
             v.question_id = mquestion.id

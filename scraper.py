@@ -36,7 +36,7 @@ class ElevcentralenScraper:
 
     def init_browser(self):
         self.use_chrome()
-        self.driver.set_window_size(768, 1024)
+        self.driver.set_window_size(1024, 768)
 
     def use_chrome(self):
         chromedriver = cfg.get("chromedriver")
