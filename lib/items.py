@@ -98,12 +98,26 @@ class Question:
     """ Update the known incorrect choice """
     def update_choice_status(self, question_id):
         mquestion = models.Question.select().where(models.Question.id == question_id).get()
+        mchoices = models.Choice.select().where(models.Choice.question_id == question_id)
         if mquestion.is_known:
-            mchoices = models.Choice.select().where(models.Choice.question_id == question_id)
             for mchoice in mchoices:
                 if mchoice.status == 0:
                     mchoice.status = -1
                     mchoice.save()
+        else:
+            # If there is one's status is unknown and all others are wrong, then this one is correct
+            n = 0
+            for mchoice in mchoices:
+                if mchoice.status == 0:
+                    n = n + 1
+            if n == 1:
+                for mchoice in mchoices:
+                    if mchoice.status == 0:
+                        mchoice.status = 1
+                        mchoice.save()
+                        mquestion.is_known = 1
+                        mquestion.save()
+                        break
 
     def add_or_update(self):
 
