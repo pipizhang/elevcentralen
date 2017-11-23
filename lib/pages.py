@@ -2,6 +2,7 @@ import os
 import time
 import sys
 import random
+import re
 from . import config as cfg
 from . import models
 from . import helper
@@ -76,14 +77,18 @@ class TestProgressPage(Page):
     def _process(self):
         tests = self.driver.find_elements_by_xpath("//a[text()='Overview']")
 
-        """ save js to a list to avoid the error of losing DOM reference """
-        _onclick_list = []
+        """ save js to memory to avoid the error of losing DOM reference """
+        _onclick_dict = {}
         for el in tests:
             _onclick = el.get_attribute("onclick").strip().replace(" return false;", "")
-            _onclick_list.append(_onclick)
+            _m = re.search("TestOverview\/(\d+)\/", _onclick)
+            if _m != None:
+                _onclick_dict[_m[1]] = _onclick
 
-        for _onclick in _onclick_list:
-            #print("--- %s" % _onclick)
+        _onclick_sorted = sorted(_onclick_dict.items(), key=lambda kv:kv[0], reverse=True)
+
+        for v in _onclick_sorted:
+            _onclick = v[1]
             self._open_education_overview_page(_onclick)
             time.sleep(5)
 
