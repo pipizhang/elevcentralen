@@ -114,8 +114,11 @@ class EducationOverviewPage(Page):
             _onclick_list.append(el.get_attribute("onclick").strip().replace(" return false;", ""))
         self.driver.find_element_by_xpath("//div[@class='modal-footer']/button").click()
 
+        n = 1
         for _onclick in _onclick_list:
+            print(" # [%d - %d]" % (n, len(_onclick_list)))
             self._open_question_page(_onclick)
+            n += 1
             time.sleep(5)
 
         self._quite_test()
