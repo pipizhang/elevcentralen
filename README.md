@@ -1,4 +1,20 @@
 # elevcentralen-scraper
+Scrape Elevcentralen content with python-selenium. This app is a exercise of scraping a SPA content.
 
-Scrape Elevcentralen content with python-selenium, in order to re-organize content for more efficient study. This app is a exercise of scraping a SPA content as well.
+### Features
+* Scraping driving licence questions data (text and images)
+* Get the correct answer from unknown question by analysis data
+* Screenshot of question page
+* Croping screenshot
+
+### Install
+```
+pip install -r requirements.txt
+```
+
+```python
+# create db and tables
+from lib import models
+models.setup(True)
+```
 
