@@ -3,6 +3,7 @@
 
 # app
 __pycache__
+.cache
 /config/app.yml
 /data/main.db
 
